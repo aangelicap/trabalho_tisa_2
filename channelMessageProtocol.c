@@ -24,8 +24,10 @@ int MESSAGE_INDEX = 4;
 int TIMESTAMP_INDEX = 5;
 
 /**
- * Functions
+ * Funções 
  */
+
+/*Função responsável por calcular o checksum*/
 unsigned short calculateCheckSum(const unsigned char* data_p) {
     unsigned char length = CHANNEL_PACKAGE_SIZE;
     unsigned char x;
@@ -39,29 +41,31 @@ unsigned short calculateCheckSum(const unsigned char* data_p) {
     return checkSum;
 }
 
+/*Função responsável por criar os pacotes de comunicação*/
 void buildChannelPackage(char messageType, char seqNumber, char message, struct timeval * timestamp, char * package) {
     package[MESSAGE_TYPE_INDEX] = messageType;
 
     package[SEQ_NUMBER_INDEX] = seqNumber;
 
-    /* Fill out checksum position with zeroes */
+    /* Preenche a posição do checksum com zeros */
     memset(&package[CHECKSUM_INDEX], 0, 2);
 
     package[MESSAGE_INDEX] = message;
 
     memcpy(&package[TIMESTAMP_INDEX], timestamp, sizeof(struct timeval));
     
-    /* Calculate checksum for entire package and place it at checksum position */
+     /* Calcula a soma de verificação para o pacote inteiro e coloca na posição do checksum */
     unsigned short checkSum = calculateCheckSum(package);
     memcpy(&package[CHECKSUM_INDEX], &checkSum, 2);
 }
 
+/*Função responsável pelo canal de análise de pacotes */
 int parseChannelPackage(char * package, struct channelMessage *messageInfo) {
-    /* Store expected checksum */
+    /* Armazena a soma de verificação esperada */
     unsigned short expectedChecksum;
     memcpy((unsigned short *) &expectedChecksum, &package[CHECKSUM_INDEX], 2);
-
-    /* Fill out checksum position with zeroes for checksum calculation */
+    
+    /* Preenche a posição da soma de verificação com zeros para o cálculo da soma de verificação */
     memset(&package[CHECKSUM_INDEX], 0, 2);
 
     unsigned short currentChecksum = calculateCheckSum(package);
