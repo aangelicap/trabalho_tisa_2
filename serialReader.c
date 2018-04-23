@@ -18,12 +18,15 @@ int serialport_writebyte(int fd, uint8_t b);
 int serialport_write(int fd, const char* str);
 int serialport_read_until(int fd, char* buf, char until);
 
+/*Esta função é responsável pela escrita de bytes*/
 int serialport_writebyte( int fd, uint8_t b){
     int n = write(fd,&b,1);
     if( n!=1)
         return -1;
     return 0;
 }
+
+/*Função responsável pela escrita e pelo cálculo do tamanho da string*/
 int serialport_write(int fd, const char* str) {
     int len = strlen(str);
     int n = write(fd, str, len);
@@ -32,6 +35,12 @@ int serialport_write(int fd, const char* str) {
     return 0;
 }
 
+/* Esta função é responsável pela leitura de dados. 
+* Parâmetros:   
+*    int fd: abre o arquivo
+*    char * buf: dado a ser lido
+*    char until: utilizado para a marcação do último caractere
+*/
 int serialport_read_until(int fd, char* buf, char until) {
     int infoReaderPeriod = 100;
     struct timespec infoReaderClock;
@@ -43,58 +52,44 @@ int serialport_read_until(int fd, char* buf, char until) {
     int n;
 
        while( readStarted == 0 || b[0] != until ) {
-            n = read(fd, b, 1);  // read a char at a time
+            n = read(fd, b, 1);    //Ler um char de cada vez
             if( n==-1) {
-              usleep( 10 * 1000 ); // error, just keep waiting
+              usleep( 10 * 1000 ); //Se ocorreu erro, aguarda
                 continue;
             }
             if( n==0 ) {
-               usleep( 10 * 1000 ); // wait 10 msec try again
+               usleep( 10 * 1000 ); //Aguarda 10 msec e tenta novamente
                 continue;
 
             }
             
             if (b[0] == 'I') {
-                readStarted = 1;
+                readStarted = 1;  //Se o primeiro caractere recebido for I, inicia a leitura
                 usleep( 10 * 1000 ); 
             }
             
             if (readStarted == 1 && b[0] != 'I') {
                buf[i] = b[0]; 
                i++;
-               //usleep( 1 * 1000 ); 
             }
         } 
         buf[i] = 0;  // null terminate the string
 
        return 0;
     }
-    
+
+/*Esta função é responsável iniciar a transmissão de dados
+* binários. Utiliza os parâmetros: 
+*     const char* serialport: string com o nome da porta serial
+*     int baud: taxa de transmissão (bps) (velocidade da conexão)
+*/
 int serialport_init(const char* serialport, int baud){
     int fd;
        
-    fd = open(serialport, O_RDONLY);
+    fd = open(serialport, O_RDONLY); // open: abre o arquivo especificado pelo nome do caminho
+                                     // O_RDONLY: somente leitura  
     if (fd == -1)  {
         perror("init_serialport: Unable to open port ");
         return -1;
     } 
 }
-
-// int main(int argc, char *argv[]) {
-//     int readerPeriod = 1000;
-//     struct timespec readerClock;
-//     clock_gettime(CLOCK_MONOTONIC ,&readerClock);
-    
-//     int fd = 0;
-//     char serialport[256] = {"/dev/ttyACM0"};
-//     int baudrate = B9600;  // default
-//     char buf[256];
-
-//     while(1){
-//         fd = serialport_init(serialport, baudrate);
-//         serialport_read_until(fd, buf, '\n');
-//         printf("read: %s\n", buf);
-//         insert(buf[0]);
-//         alarmClock(readerPeriod, &readerClock);
-//     }
-// }
