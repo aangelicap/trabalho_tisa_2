@@ -9,6 +9,7 @@
 #define NSEC_PER_SEC (1000000000) /* The number of nsecs per sec. */
 pthread_t userInterface, clientChannel, logGenerator;
 
+/*Esta função realiza o controle periódico de tempo*/
 void alarmClock(int milisecInterval, struct timespec *t) {
     t->tv_nsec += milisecInterval * 1000000;
 
@@ -20,6 +21,7 @@ void alarmClock(int milisecInterval, struct timespec *t) {
     clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, t, NULL);
 }
 
+/*Função resposnsável por gerar o arquivo de log*/
 void * logInfo() {
     FILE *file;
 
@@ -59,6 +61,7 @@ void * startUX(void * arg) {
 	}
 }
 
+/*Inicia canal de comunicação no lado cliente */
 void * startClientChannel(void * arg) {
 	startClient();
 	listenServer();
