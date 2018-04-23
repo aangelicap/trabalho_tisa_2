@@ -18,9 +18,6 @@ pthread_cond_t bufferFullAlarm = PTHREAD_COND_INITIALIZER;
 void insertValue(char data, struct timeval * timestamp) {
     pthread_mutex_lock(&bufferMutex);
         buffer[bufferFree][bufferFreeIndex].data = data;
-        memcpy(&buffer[bufferFree][bufferFreeIndex].timestamp, timestamp, sizeof(struct timeval));
-
-        // buffer[bufferFree][bufferFreeIndex].waterTemp = waterTemp;
         bufferFreeIndex++;
 
         if (bufferFreeIndex == TAMBUF) {
@@ -45,5 +42,3 @@ struct buffer_data * waitFullBuffer (void) {
 
     return bufferFullPointer;
 }
-
-
